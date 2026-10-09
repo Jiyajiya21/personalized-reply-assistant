@@ -14,6 +14,9 @@ const elements = {
   insertButton: document.querySelector('#insertButton'),
   clearButton: document.querySelector('#clearButton'),
   revisionControls: document.querySelector('#revisionControls'),
+  profileFullName: document.querySelector('#profileFullName'),
+  profileSignName: document.querySelector('#profileSignName'),
+  profileStyle: document.querySelector('#profileStyle'),
   provider: document.querySelector('#provider'),
   connectOllamaButton: document.querySelector('#connectOllamaButton'),
   ollamaModel: document.querySelector('#ollamaModel')
@@ -42,6 +45,9 @@ elements.clearButton.addEventListener('click', () => {
   updateDraftActions();
 });
 elements.draft.addEventListener('input', updateDraftActions);
+[elements.profileFullName, elements.profileSignName, elements.profileStyle].forEach((element) => {
+  element.addEventListener('change', saveSettings);
+});
 elements.provider.addEventListener('change', saveSettings);
 elements.ollamaModel.addEventListener('change', saveSettings);
 elements.connectOllamaButton.addEventListener('click', connectOllama);
@@ -54,8 +60,11 @@ chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
 init();
 
 async function init() {
-  const saved = await chrome.storage.local.get(['provider', 'ollamaModel']);
+  const saved = await chrome.storage.local.get(['provider', 'ollamaModel', 'profile']);
   elements.provider.value = saved.provider || 'auto';
+  elements.profileFullName.value = saved.profile?.fullName || '';
+  elements.profileSignName.value = saved.profile?.signName || '';
+  elements.profileStyle.value = saved.profile?.style || '';
   if (saved.ollamaModel) addModelOption(saved.ollamaModel, true);
 
   const sessionState = await chrome.storage.session.get(['pendingContext', 'activePage']);
@@ -155,7 +164,8 @@ async function captureFromPage() {
 
     const executionResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id, allFrames: looksLikeLinkedIn },
-      func: async () => {
+      args: [getProfile()],
+      func: async (profile) => {
         const selected = window.getSelection()?.toString().trim() || '';
         const host = location.hostname;
         const visible = (node) => {
@@ -194,6 +204,11 @@ async function captureFromPage() {
           const subject = document.querySelector('h2.hP')?.textContent?.trim() || '';
           const accountLabel = document.querySelector('[aria-label^="Google Account:"]')?.getAttribute('aria-label') || '';
           const accountEmail = accountLabel.match(/\(([^)]+@[^)]+)\)/)?.[1]?.toLowerCase() || '';
+          const accountName = accountLabel
+            .replace(/^Google Account:\s*/i, '')
+            .replace(/\s*\([^)]+@[^)]+\).*$/, '')
+            .trim();
+          const configuredName = clean(profile?.fullName).toLowerCase();
           const bodies = [...document.querySelectorAll('.a3s')].filter((node) => {
             const box = node.getBoundingClientRect();
             return box.width > 0 && box.height > 0 && node.textContent.trim();
@@ -207,13 +222,13 @@ async function captureFromPage() {
             const date = container?.querySelector('.g3')?.getAttribute('title') ||
               container?.querySelector('.g3')?.textContent?.trim() || '';
             const fromSelf = (senderEmail && accountEmail && senderEmail.toLowerCase() === accountEmail) ||
-              /^Jiya(?:\s+Dariyani)?$/i.test(sender);
+              (configuredName && clean(sender).toLowerCase() === configuredName);
             return {
               fromSelf,
               sender,
               senderEmail,
               text: [
-                `MESSAGE ${index + 1} — ${fromSelf ? 'SENT BY JIYA' : 'RECEIVED BY JIYA'}`,
+                `MESSAGE ${index + 1} — ${fromSelf ? 'SENT BY USER' : 'RECEIVED BY USER'}`,
                 sender ? `From: ${sender}` : '',
                 senderEmail ? `Sender email: ${senderEmail}` : '',
                 date ? `Date: ${date}` : '',
@@ -227,11 +242,12 @@ async function captureFromPage() {
           }
           const latest = structuredMessages.at(-1);
           const status = latest.fromSelf
-            ? 'LATEST MESSAGE STATUS: SENT BY JIYA — waiting for the other person to respond.'
-            : 'LATEST MESSAGE STATUS: RECEIVED BY JIYA — a reply may be needed.';
+            ? 'LATEST MESSAGE STATUS: SENT BY USER — waiting for the other person to respond.'
+            : 'LATEST MESSAGE STATUS: RECEIVED BY USER — a reply may be needed.';
           return {
             ok: true,
             site: 'gmail',
+            accountName,
             latestFromSelf: latest.fromSelf,
             recipientName: latest.fromSelf ? '' : firstName(latest.sender),
             context: [`Subject: ${subject}`, status, ...structuredMessages.map((message) => message.text)]
@@ -285,10 +301,11 @@ async function captureFromPage() {
           );
           const senderMarkers = [...conversation.text.matchAll(/([^\n]+?) sent the following messages?/gi)];
           const latestSender = senderMarkers.at(-1)?.[1] || '';
+          const configuredName = clean(profile?.fullName).toLowerCase();
           return {
             ok: true,
             site: 'linkedin',
-            latestFromSelf: /\bJiya Dariyani\b/i.test(latestSender),
+            latestFromSelf: Boolean(configuredName && clean(latestSender).toLowerCase().includes(configuredName)),
             recipientName: firstName(nameNode?.textContent),
             context: conversation.text.slice(-12000)
           };
@@ -317,6 +334,13 @@ async function captureFromPage() {
 
     if (!result?.ok) throw new Error(result?.error || 'The page context could not be captured.');
     elements.context.value = result.context;
+    if (!elements.profileFullName.value.trim() && result.accountName) {
+      elements.profileFullName.value = result.accountName;
+      if (!elements.profileSignName.value.trim()) {
+        elements.profileSignName.value = result.accountName.split(/\s+/)[0] || '';
+      }
+      await saveSettings();
+    }
     if (result.recipientName) elements.recipientName.value = result.recipientName;
     if (result.site === 'gmail') setSiteFromUrl('https://mail.google.com/');
     if (result.site === 'linkedin') setSiteFromUrl('https://www.linkedin.com/');
@@ -404,9 +428,19 @@ function addModelOption(name, selected) {
 async function saveSettings() {
   await chrome.storage.local.set({
     provider: elements.provider.value,
-    ollamaModel: elements.ollamaModel.value
+    ollamaModel: elements.ollamaModel.value,
+    profile: getProfile()
   });
   updateEngineStatus();
+}
+
+function getProfile() {
+  const fullName = elements.profileFullName.value.trim();
+  return {
+    fullName,
+    signName: elements.profileSignName.value.trim() || fullName.split(/\s+/)[0] || '',
+    style: elements.profileStyle.value.trim()
+  };
 }
 
 function chooseProvider() {
@@ -436,9 +470,9 @@ async function generateDraft() {
     return;
   }
 
-  const latestFromJiya = /LATEST MESSAGE STATUS:\s*SENT BY JIYA/i.test(context);
+  const latestFromUser = /LATEST MESSAGE STATUS:\s*SENT BY USER/i.test(context);
   const explicitFollowUp = /\b(?:follow[- ]?up|send another|new message)\b/i.test(elements.instruction.value);
-  if (latestFromJiya && !explicitFollowUp) {
+  if (latestFromUser && !explicitFollowUp) {
     elements.draft.value = '';
     updateDraftActions();
     showNotice('No reply drafted: your message is already the latest one. You are waiting for the other person to respond.');
@@ -460,7 +494,8 @@ async function generateDraft() {
     instruction,
     tone: selectedTone,
     channel: elements.channel.value,
-    currentDraft: elements.draft.value.trim()
+    currentDraft: elements.draft.value.trim(),
+    profile: getProfile()
   };
   const provider = chooseProvider();
   setBusy(true, provider === 'chrome' ? 'Preparing Chrome’s on-device model…' : 'Drafting locally…');
@@ -492,7 +527,7 @@ async function generateWithChrome(input) {
   if (typeof LanguageModel === 'undefined') throw new Error('Chrome on-device AI is not available in this browser profile.');
   const options = {
     ...languageOptions(),
-    initialPrompts: [{ role: 'system', content: ReplyCore.SYSTEM_PROMPT }],
+    initialPrompts: [{ role: 'system', content: ReplyCore.buildSystemPrompt(input.profile) }],
     monitor(monitor) {
       monitor.addEventListener('downloadprogress', (event) => {
         elements.progress.textContent = `Downloading the local Chrome model: ${Math.round(event.loaded * 100)}%`;
@@ -510,7 +545,7 @@ async function generateWithChrome(input) {
 
 async function generateWithOllama(input) {
   if (!ollamaReady || !elements.ollamaModel.value) throw new Error('Connect Ollama and choose an installed model first.');
-  const prompt = `${ReplyCore.SYSTEM_PROMPT}\n\n${ReplyCore.buildPrompt(input)}`;
+  const prompt = `${ReplyCore.buildSystemPrompt(input.profile)}\n\n${ReplyCore.buildPrompt(input)}`;
   const response = await chrome.runtime.sendMessage({
     type: 'OLLAMA_GENERATE',
     model: elements.ollamaModel.value,

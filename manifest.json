@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Jiya Reply Assistant",
-  "version": "0.3.6",
-  "description": "Draft private, personalised replies in Jiya's voice without sending automatically.",
+  "name": "Personalized Reply Assistant",
+  "version": "0.4.0",
+  "description": "Draft private, personalized replies in your own voice without sending automatically.",
   "minimum_chrome_version": "138",
   "permissions": [
     "activeTab",
@@ -25,7 +25,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Open Jiya Reply Assistant"
+    "default_title": "Open Personalized Reply Assistant"
   },
   "side_panel": {
     "default_path": "sidepanel.html"

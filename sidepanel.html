@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Jiya Reply Assistant</title>
+    <title>Personalized Reply Assistant</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <header class="topbar">
       <div>
         <p class="eyebrow">PRIVATE DRAFTING</p>
-        <h1>Reply Assistant</h1>
+        <h1>Personalized Reply Assistant</h1>
       </div>
       <span id="aiStatus" class="status checking">Checking AI…</span>
     </header>
@@ -92,6 +92,25 @@
         <div id="progress" class="progress hidden" aria-live="polite"></div>
       </section>
 
+      <details class="settings" open>
+        <summary>Personalization</summary>
+        <div class="two-columns">
+          <label>
+            Your full name
+            <input id="profileFullName" type="text" autocomplete="name" placeholder="e.g. Alex Morgan">
+          </label>
+          <label>
+            Sign-off name
+            <input id="profileSignName" type="text" autocomplete="off" placeholder="e.g. Alex">
+          </label>
+        </div>
+        <label>
+          Your writing style
+          <textarea id="profileStyle" rows="3" placeholder="e.g. Concise, warm and professional. Use short paragraphs and British English."></textarea>
+        </label>
+        <p class="hint">Saved only in this Chrome profile. Gmail can fill in your name automatically when you scan a thread.</p>
+      </details>
+
       <details class="settings">
         <summary>Local AI settings</summary>
         <label>
@@ -108,7 +127,7 @@
           Ollama model
           <select id="ollamaModel"><option value="">No model detected</option></select>
         </label>
-        <p class="hint">The extension never uses an API key. Chrome AI and Ollama process drafts on this computer.</p>
+        <p class="hint">No API key is required. Chrome AI and Ollama process drafts on this computer.</p>
       </details>
     </main>
 

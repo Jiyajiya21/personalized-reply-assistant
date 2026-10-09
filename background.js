@@ -1,4 +1,4 @@
-const MENU_ID = 'jiya-draft-selection';
+const MENU_ID = 'personalized-reply-draft-selection';
 
 async function configureSidePanel() {
   await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU_ID,
-      title: 'Draft a reply with Jiya Reply Assistant',
+      title: 'Draft a reply with Personalized Reply Assistant',
       contexts: ['selection']
     });
   });

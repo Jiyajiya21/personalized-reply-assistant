@@ -1,97 +1,93 @@
-# Jiya Reply Assistant — Chrome extension
+# Personalized Reply Assistant
 
-This is a private, draft-only Chrome extension. It can scan an open Gmail, LinkedIn or web conversation, draft a reply in Jiya's writing style, revise the tone, copy the result, and insert it into supported reply boxes. It never clicks Send.
+A private, draft-only Chrome extension that reads an open Gmail, LinkedIn, or web conversation and suggests a reply in the user's chosen style. The user can revise the tone, copy the result, or insert it into the page. The extension never presses **Send**.
 
-The project requires no paid API key. Drafting can use Chrome's on-device AI, an optional Ollama model running locally, or built-in templates.
+No paid API key is required. Drafting can use Chrome's built-in on-device AI, an optional Ollama model running locally, or the included smart templates.
 
-## What works in version 0.3.6
+## Download and install
 
-- Chrome side panel available beside the current webpage.
-- One-click **Scan page & draft** for an open Gmail thread.
-- Availability requests automatically receive two or three concrete, editable time suggestions based on the requested day and time of day.
-- Availability suggestions run only when the latest message directly asks for a date or time; internal drafting labels are never shown in the reply.
-- The optional instruction box and tone controls appear only after the first draft is created.
-- One-click visible-conversation scanning on LinkedIn and supported websites.
-- Gmail Insert opens a closed reply box before placing the draft.
-- Gmail messages are labelled as sent or received, and no draft is created when Jiya's own message is the latest in the thread.
-- Selected-text capture remains available as a fallback.
-- Personalised style rules based on 53 cleaned sent emails.
-- Natural, polite, warmer, shorter and firmer controls.
-- Chrome on-device Prompt API when the device/browser supports it.
-- Optional local Ollama connection, with no cloud API key.
-- Limited smart-template fallback for simple replies.
-- Copy everywhere and insert into Gmail, LinkedIn and supported editable fields.
-- LinkedIn conversation scanning with direct draft insertion into the open message box.
+### Ready-to-load package
 
-## Privacy and safety
+1. Download [`dist/personalized-reply-assistant-v0.4.0.zip`](dist/personalized-reply-assistant-v0.4.0.zip).
+2. Extract the ZIP file. Chrome cannot load the ZIP directly.
+3. Open `chrome://extensions` in Chrome.
+4. Turn on **Developer mode**.
+5. Click **Load unpacked**.
+6. Select the extracted folder that directly contains `manifest.json`.
+7. Pin **Personalized Reply Assistant** to the Chrome toolbar.
 
-- There is no analytics or external server.
-- Chrome AI and Ollama process content locally on the computer.
-- Gmail and LinkedIn access is declared explicitly because those are the extension's core supported sites. Other websites request access only when **Scan page & draft** is used.
-- The extension stores only engine preferences locally. Conversation text is not saved after the panel closes.
-- No automatic sending is implemented.
-- Automatic sending is intentionally excluded. Insertion only places the reviewed draft into the open editor.
-- See [PRIVACY.md](PRIVACY.md) for the complete data-handling summary.
+### From the source code
+
+Download or clone this repository, then use **Load unpacked** and select the repository folder. The main Chrome load file is [`manifest.json`](manifest.json).
+
+## Personalize it
+
+1. Open the extension's side panel.
+2. Expand **Personalization**.
+3. Add your full name and the name you want in your email sign-off.
+4. Describe your writing style, for example: `Concise, warm and professional. Use short paragraphs and British English.`
+5. Open a conversation and click **Scan page & draft**.
+
+These settings are stored only in the user's Chrome profile. When the full-name field is empty, a Gmail scan can infer the signed-in account name and save it locally. The draft can still be edited before it is inserted or sent.
+
+## What is the drafting engine?
+
+In **Automatic** mode, the extension uses the first available option in this order:
+
+1. Chrome's on-device Prompt API (Gemini Nano).
+2. A local Ollama model, if Ollama is installed, running, and connected.
+3. Built-in smart templates for simple replies.
+
+The extension does not connect to ChatGPT or the OpenAI API, and it contains no OpenAI API key. Chrome's Prompt API model is downloaded and run by Chrome on the user's device.
+
+## Main features
+
+- Side panel available beside the current webpage.
+- One-click conversation scanning and first-draft generation.
+- Personalized full name, sign-off, and writing-style settings.
+- Gmail sender-direction checks to avoid answering the user's own latest message.
+- LinkedIn conversation scanning and draft insertion.
+- Concrete, editable time suggestions for direct availability questions.
+- Natural, polite, warmer, shorter, and firmer tone controls.
+- Copy and insert actions without automatic sending.
+- Selected-text capture as a fallback on supported websites.
 
 ## How it works
 
 1. The user opens an email or message and clicks **Scan page & draft**.
-2. The extension reads the visible conversation and identifies the latest sender.
-3. If Jiya already sent the latest message, no reply is drafted.
-4. Otherwise, the local drafting engine creates a concise reply in Jiya's writing style.
-5. The user can change the tone, wording, facts or suggested availability.
-6. **Insert into page** places the draft into Gmail, LinkedIn or another supported editor. The user remains responsible for pressing **Send**.
+2. The extension reads the visible conversation and identifies the latest sender where supported.
+3. If the user's message is already the latest one, no reply is drafted.
+4. Otherwise, the selected local drafting engine creates a reply using the saved style.
+5. The user can change the tone, wording, facts, or suggested availability.
+6. **Insert into page** places the draft in the supported editor. The user reviews it and presses **Send**.
+
+## Privacy and safety
+
+- There is no analytics or developer-operated server.
+- Chrome AI and Ollama process content locally on the computer.
+- Gmail and LinkedIn access is declared because they are the primary supported sites.
+- Other websites request access only when **Scan page & draft** is used.
+- Conversation text is not saved after the side panel closes.
+- The extension stores only personalization and engine preferences locally.
+- Automatic sending is intentionally excluded.
+- See [PRIVACY.md](PRIVACY.md) for the complete data-handling summary.
 
 ## Project structure
 
 | File | Purpose |
 | --- | --- |
-| `manifest.json` | Chrome Manifest V3 configuration and permissions |
-| `background.js` | Side-panel, context-menu and local Ollama message handling |
+| `manifest.json` | Main Chrome Manifest V3 load file and permissions |
+| `background.js` | Side-panel, context-menu, and local Ollama handling |
 | `sidepanel.html` | Extension side-panel interface |
 | `styles.css` | Side-panel styling |
-| `sidepanel.js` | Page scanning, draft generation, revision and insertion |
-| `core.js` | Voice rules, prompts, scheduling logic and template fallback |
+| `sidepanel.js` | Page scanning, draft generation, revision, and insertion |
+| `core.js` | Personalized prompts, scheduling logic, and template fallback |
 | `PRIVACY.md` | Data-handling and user-control documentation |
-| `CHANGELOG.md` | Version history |
+| `dist/personalized-reply-assistant-v0.4.0.zip` | Ready-to-download extension package |
 
 ## Important limitations
 
-- LinkedIn and Gmail can change their page structure, which may require selector updates.
-- Suggested availability is an editable proposal; it is not connected to Jiya's calendar.
-- Local models can make mistakes, so every draft should be checked before sending.
+- Gmail and LinkedIn can change their page structure, which may require selector updates.
+- Suggested availability is an editable proposal; it is not connected to the user's calendar.
+- On-device models can make mistakes, so every draft should be checked before sending.
 - The extension intentionally does not send messages automatically.
-
-## Install for testing
-
-1. Open `chrome://extensions` in Chrome.
-2. Turn on **Developer mode**.
-3. Click **Load unpacked**.
-4. Select this `personal-reply-assistant-extension` folder.
-5. Pin **Jiya Reply Assistant** to the toolbar.
-6. Open an email in Gmail and click the extension icon.
-
-Chrome may download its local AI model after the first Draft click. If Chrome AI is unavailable, the status shows **Limited mode**. The extension can then use its safe templates, or connect to Ollama after Ollama and a model are installed separately.
-
-## Test Gmail
-
-1. Open an email thread.
-2. Click the extension icon and then **Scan page & draft**.
-3. The first draft appears automatically. For availability requests, adjust the suggested date or times if needed.
-4. Use **Adjust this draft** only when you want to change the wording, facts or tone.
-5. Click **Insert into page**. Gmail's reply box opens automatically when needed.
-6. Confirm that nothing is sent until you press Gmail's Send button yourself.
-
-## Test another website
-
-1. Open the conversation you want to answer.
-2. Open the extension and click **Scan page & draft**.
-3. The first draft appears automatically.
-4. Use **Adjust this draft** only when you want to change the wording, facts or tone.
-5. Copy the result, or use **Insert into page** on supported sites.
-
-On LinkedIn, **Insert into page** places the text in the open message box. It does not press **Send**.
-
-## Version history
-
-See [CHANGELOG.md](CHANGELOG.md).
