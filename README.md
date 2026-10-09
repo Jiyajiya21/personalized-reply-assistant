@@ -1,4 +1,4 @@
-# Personalized Reply Assistant
+# Personalized Reply Assistant - Chrome Extension
 
 A private, draft-only Chrome extension that reads an open Gmail, LinkedIn, or web conversation and suggests a reply in the user's chosen style. The user can revise the tone, copy the result, or insert it into the page. The extension never presses **Send**.
 
@@ -7,6 +7,8 @@ No paid API key is required. Drafting can use Chrome's built-in on-device AI, an
 ## Download and install
 
 ### Ready-to-load package
+
+`dist` means **distribution**. It contains the packaged extension that people can download and install, while the other files in the repository are the editable source code.
 
 1. Download [`dist/personalized-reply-assistant-v0.4.0.zip`](dist/personalized-reply-assistant-v0.4.0.zip).
 2. Extract the ZIP file. Chrome cannot load the ZIP directly.
@@ -30,7 +32,7 @@ Download or clone this repository, then use **Load unpacked** and select the rep
 
 These settings are stored only in the user's Chrome profile. When the full-name field is empty, a Gmail scan can infer the signed-in account name and save it locally. The draft can still be edited before it is inserted or sent.
 
-## What is the drafting engine?
+## What is the Brain?
 
 In **Automatic** mode, the extension uses the first available option in this order:
 
