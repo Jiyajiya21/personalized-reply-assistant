@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jiya Reply Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">PRIVATE DRAFTING</p>
+        <h1>Reply Assistant</h1>
+      </div>
+      <span id="aiStatus" class="status checking">Checking AI…</span>
+    </header>
+
+    <main>
+      <section id="siteNotice" class="notice hidden" aria-live="polite"></section>
+
+      <section class="card scan-card">
+        <div class="section-heading">
+          <div>
+            <p class="step">1 · SCAN</p>
+            <h2>Read the open conversation</h2>
+          </div>
+        </div>
+        <button id="captureButton" class="button primary scan-button" type="button">Scan page &amp; draft</button>
+        <p class="hint">Reads the conversation you currently have open. It never presses Send.</p>
+        <details class="captured-context">
+          <summary>View scanned conversation</summary>
+          <textarea id="context" rows="8" placeholder="The scanned conversation will appear here."></textarea>
+        </details>
+      </section>
+
+      <section class="card result-card">
+        <div class="section-heading">
+          <div>
+            <p class="step">2 · DRAFT</p>
+            <h2>Suggested reply</h2>
+          </div>
+          <button id="clearButton" class="text-button" type="button">Clear</button>
+        </div>
+        <textarea id="draft" rows="10" placeholder="Your personalised draft will appear here."></textarea>
+        <div class="actions">
+          <button id="copyButton" class="button secondary" type="button" disabled>Copy</button>
+          <button id="insertButton" class="button primary" type="button" disabled>Insert into page</button>
+        </div>
+        <p class="safety">Nothing is sent automatically. You review and press Send.</p>
+      </section>
+
+      <section id="revisionControls" class="card optional-guidance hidden">
+        <div class="section-heading">
+          <div>
+            <p class="step">3 · OPTIONAL</p>
+            <h2>Adjust this draft</h2>
+          </div>
+        </div>
+        <label>
+          What would you like to change?
+          <textarea id="instruction" rows="2" placeholder="e.g. Make it warmer, shorten it, or change the suggested times"></textarea>
+        </label>
+        <div class="tone-row" role="group" aria-label="Tone">
+          <button class="tone selected" data-tone="default" type="button">Natural</button>
+          <button class="tone" data-tone="polite" type="button">Polite</button>
+          <button class="tone" data-tone="warmer" type="button">Warmer</button>
+          <button class="tone" data-tone="shorter" type="button">Shorter</button>
+          <button class="tone" data-tone="firmer" type="button">Firmer</button>
+        </div>
+        <details class="advanced-guidance">
+          <summary>Other details <span>optional</span></summary>
+          <div class="two-columns">
+            <label>
+              Recipient’s first name
+              <input id="recipientName" type="text" autocomplete="off" placeholder="e.g. Maya">
+            </label>
+            <label>
+              Channel
+              <select id="channel">
+                <option value="email">Email</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="chat">Chat / message</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            Facts to include
+            <textarea id="facts" rows="3" placeholder="Dates, decisions or details that must be included"></textarea>
+          </label>
+        </details>
+        <button id="generateButton" class="button secondary full-width" type="button">Update draft</button>
+        <div id="progress" class="progress hidden" aria-live="polite"></div>
+      </section>
+
+      <details class="settings">
+        <summary>Local AI settings</summary>
+        <label>
+          Drafting engine
+          <select id="provider">
+            <option value="auto">Automatic</option>
+            <option value="chrome">Chrome on-device AI</option>
+            <option value="ollama">Ollama on this Mac</option>
+            <option value="templates">Smart templates only</option>
+          </select>
+        </label>
+        <button id="connectOllamaButton" class="button secondary" type="button">Check Ollama</button>
+        <label>
+          Ollama model
+          <select id="ollamaModel"><option value="">No model detected</option></select>
+        </label>
+        <p class="hint">The extension never uses an API key. Chrome AI and Ollama process drafts on this computer.</p>
+      </details>
+    </main>
+
+    <script src="core.js"></script>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

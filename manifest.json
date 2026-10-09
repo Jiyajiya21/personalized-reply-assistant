@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Jiya Reply Assistant",
+  "version": "0.3.6",
+  "description": "Draft private, personalised replies in Jiya's voice without sending automatically.",
+  "minimum_chrome_version": "138",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "scripting",
+    "sidePanel",
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "https://www.linkedin.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://127.0.0.1:11434/*",
+    "http://localhost:11434/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Jiya Reply Assistant"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
+}
