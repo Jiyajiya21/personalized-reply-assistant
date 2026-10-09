@@ -1,6 +1,6 @@
 # Personalized Reply Assistant - Chrome Extension
 
-A private, draft-only Chrome extension that reads an open Gmail, LinkedIn, or web conversation and suggests a reply in the user's chosen style. The user can revise the tone, copy the result, or insert it into the page. The extension never presses **Send**.
+A local-first, draft-only Chrome extension that reads an open Gmail, LinkedIn, or web conversation and suggests a reply in the user's chosen style. The user can revise the tone, copy the result, or insert it into the page. The extension never presses **Send**.
 
 No paid API key is required. Drafting can use Chrome's built-in on-device AI, an optional Ollama model running locally, or the included smart templates.
 
